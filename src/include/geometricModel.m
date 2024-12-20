@@ -47,6 +47,20 @@ classdef geometricModel < handle
             % - iTj: vector of matrices containing the transformation matrices from link i to link j for the input q.
             % The size of iTj is equal to (4,4,numberOfLinks)
             
+            for i = 1:self.jointNumber 
+                %Rotational Joint
+                if(self.jointType(i) == 0)
+                    Rz_qi = [cos(q(i)) -sin(q(i)) 0; 
+                            sin(q(i)) cos(q(i)) 0; 
+                            0 0 1];
+                    self.iTj(1:3,1:3,i) = self.iTj_0(1:3,1:3,i) * Rz_qi;
+                % Prismatic Joint
+                elseif (self.jointType(i) == 1)
+                    self.   iTj(1:3,4,i) = self.iTj_0(1:3,4,i) + [0;0;q(i)];
+                else
+                    error('jointType must be 0 (rotational) or 1 (prismatic)')
+                end
+            end
 
         end
         function [bTk] = getTransformWrtBase(self,k)
@@ -57,6 +71,11 @@ classdef geometricModel < handle
             % bTk : transformation matrix from the manipulator base to the k-th joint in
             % the configuration identified by iTj.
 
+            bTk = eye(4); % base
+            for i=1:k
+                bTk = bTk * self.iTj(:,:,i);
+            end
+
         end
         function [bTt] = getToolTransformWrtBase(self)
             %% getToolTransformWrtBase function
@@ -64,7 +83,8 @@ classdef geometricModel < handle
             % None 
             % bTt : transformation matrix from the manipulator base to the
             % tool
-
+            bTe = getTransformWrtBase(self, self.jointNumber);
+            bTt = bTe * self.eTt;
         end
     end
 end

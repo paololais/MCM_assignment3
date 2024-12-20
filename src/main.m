@@ -1,4 +1,4 @@
-%% Template Exam Modelling and Control of Manipulators
+%% Template Exam Modeling and Control of Manipulators
 clc;
 close all;
 clear;
@@ -13,7 +13,12 @@ q0 = [0,0,0,0,0,0,0]';
 
 %% Define the tool frame rigidly attached to the end-effector
 % Tool frame definition
-eTt = ...;
+eTt = eye(4);
+e_eta_te = [0, 0 ,pi/10];
+oOt = [0.2, 0, 0].';
+eRt = YPRToRot(e_eta_te(1,1),e_eta_te(1,2), e_eta_te(1,3));
+eTt(1:3,1:3) = eRt;
+eTt(1:3,4) = oOt;
 
 %% Initialize Geometric Model (GM) and Kinematic Model (KM)
 
@@ -26,7 +31,7 @@ km = kinematicModel(gm);
 %% Compute trasformation of the tool w.r.t. the base frame
 % Update direct geoemtry given q=q0
 
-bTt = ...;
+bTt = getToolTransformWrtBase(gm);
 
 disp("eTt");
 disp(eTt);
@@ -35,7 +40,7 @@ disp(bTt);
 
 %% Define the goal frame and initialize cartesian control
 % Goal definition 
-bTg = ...; 
+%bTg = ...; 
 disp('bTg')
 disp(bTg)
 
@@ -101,7 +106,7 @@ for i = t
 
     %% INVERSE KINEMATIC
     % Compute desired joint velocities ... to do
-    q_dot = ...;
+    %q_dot = ...;
 
     % simulating the robot - implement KinematicSimulation
     q = KinematicSimulation(q, q_dot, dt, qmin, qmax);
