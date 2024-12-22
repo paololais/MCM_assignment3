@@ -105,10 +105,6 @@ color = cmap(mod(cindex,csize)+1,:);
 plot3(bTg(1,4),bTg(2,4),bTg(3,4),'ro')
 
 %%%%%%% Kinematic Simulation %%%%%%%
-
-%Rigid body jacobian of Tool w.r.t EE
-%eSt=km.getRigidBodyJacobian;
-
 for i = t
     % Update geometric and kinematic model and use the cartesian control ... to do
     gm.updateDirectGeometry(q);
@@ -117,8 +113,6 @@ for i = t
     % Compute desired joint velocities
     x_dot = cc.getCartesianReference(bTg);
 
-    %bJt = eSt*km.J;
-    
     q_dot = pinv(km.J)*x_dot;
 
     % simulating the robot - implement KinematicSimulation

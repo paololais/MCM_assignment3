@@ -60,9 +60,9 @@ classdef kinematicModel < handle
         
         function [eSt] = getRigidBodyJacobian(self)
             eOt = self.gm.eTt(1:3,4);
-            bTt = self.gm.getToolTransformWrtBase();
-            bRt = bTt(1:3,1:3);
-            b_eOt = bRt * eOt;
+            bTe = self.gm.getTransformWrtBase(self.gm.jointNumber);
+            bRe = bTe(1:3,1:3);
+            b_eOt = bRe.' * eOt;
             
             eOt_vectop=[0 -b_eOt(3) b_eOt(2);
                         b_eOt(3) 0 -b_eOt(1);
