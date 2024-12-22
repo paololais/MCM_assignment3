@@ -56,7 +56,11 @@ classdef geometricModel < handle
                     self.iTj(1:3,1:3,i) = self.iTj_0(1:3,1:3,i) * Rz_qi;
                 % Prismatic Joint
                 elseif (self.jointType(i) == 1)
-                    self.   iTj(1:3,4,i) = self.iTj_0(1:3,4,i) + [0;0;q(i)];
+                    T= [1,0,0,0;
+                        0,1,0,0;
+                        0,0,1,q(i);
+                        0,0,0,1];
+                    self.iTj(:,:,i) = self.iTj_0(:,:,i) * T;
                 else
                     error('jointType must be 0 (rotational) or 1 (prismatic)')
                 end

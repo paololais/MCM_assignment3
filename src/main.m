@@ -14,11 +14,11 @@ q0 = [0,0,0,0,0,0,0]';
 %% Define the tool frame rigidly attached to the end-effector
 % Tool frame definition
 eTt = eye(4);
-e_eta_te = [0, 0 ,pi/10];
-oOt = [0.2, 0, 0].';
+e_eta_te = [0, 0, pi/10];
+eOt = [0.2, 0, 0].';
 eRt = YPRToRot(e_eta_te(1,1),e_eta_te(1,2), e_eta_te(1,3));
 eTt(1:3,1:3) = eRt;
-eTt(1:3,4) = oOt;
+eTt(1:3,4) = eOt;
 
 %% Initialize Geometric Model (GM) and Kinematic Model (KM)
 
@@ -40,7 +40,13 @@ disp(bTt);
 
 %% Define the goal frame and initialize cartesian control
 % Goal definition 
-%bTg = ...; 
+bTg = eye(4);
+b_eta_gb = [-3.02, -0.40, -1.33];
+bOg = [-0.14, -0.85, 0.6].';
+bRg = YPRToRot(b_eta_gb(1,1),b_eta_gb(1,2), b_eta_gb(1,3));
+bTg(1:3,1:3) = bRg;
+bTg(1:3,4) = bOg;
+
 disp('bTg')
 disp(bTg)
 
@@ -50,7 +56,6 @@ k_l = 0.8;
 
 % Cartesian control initialization
 cc = cartesianControl(gm,k_a,k_l);
-
 % initial configuration 
 q = [pi/2, -pi/4, 0, -pi/4, 0, 0.15, pi/4]';
 
@@ -100,13 +105,21 @@ color = cmap(mod(cindex,csize)+1,:);
 plot3(bTg(1,4),bTg(2,4),bTg(3,4),'ro')
 
 %%%%%%% Kinematic Simulation %%%%%%%
+
+%Rigid body jacobian of Tool w.r.t EE
+%eSt=km.getRigidBodyJacobian;
+
 for i = t
     % Update geometric and kinematic model and use the cartesian control ... to do
-
-
+    gm.updateDirectGeometry(q);
+    km.updateJacobian();
     %% INVERSE KINEMATIC
-    % Compute desired joint velocities ... to do
-    %q_dot = ...;
+    % Compute desired joint velocities
+    x_dot = cc.getCartesianReference(bTg);
+
+    %bJt = eSt*km.J;
+    
+    q_dot = pinv(km.J)*x_dot;
 
     % simulating the robot - implement KinematicSimulation
     q = KinematicSimulation(q, q_dot, dt, qmin, qmax);

@@ -21,8 +21,56 @@ classdef kinematicModel < handle
         %% Update Jacobian function
         % The function update:
         % - J: end-effector jacobian matrix
+             % Get the transformation matrix of the end-effector with respect to the base
+            bTe = self.gm.getTransformWrtBase(self.gm.jointNumber);
+        
+            % Extract the position of the end-effector
+            r_ee = bTe(1:3, 4);
+            for i=1:self.gm.jointNumber
+                % Get the transformation matrix for the current joint
+                bTi = self.gm.getTransformWrtBase(i);
+        
+                % Extract joint position and z-axis direction for the current joint
+                r_i = bTi(1:3, 4);  % Position of the current joint
+                k_i = bTi(1:3, 3);  % z-axis of the current joint (rotation axis)
+                %rotational joint
+                if (self.gm.jointType(i) == 0)
+                    % Angular velocity contribution (aligned with the z-axis of the current joint)
+                    self.J(1:3, i) = k_i;
 
+                    % Linear velocity contribution (cross product of z-axis and position vector)
+                    self.J(4:6, i) = cross(k_i, (r_ee - r_i));
+                    
+                %prismatic
+                elseif (self.gm.jointType(i) == 1)
+                    % Angular velocity contribution (zero for prismatic joints)
+                    self.J(1:3, i) = [0; 0; 0];
+
+                    % Linear velocity contribution (aligned with the z-axis of the current joint)
+                    self.J(4:6, i) = k_i;
+                else
+                    error('jointType must be 0 (rotational) or 1 (prismatic)')
+                end
+                eSt = self.getRigidBodyJacobian;
+     
+                self.J = eSt * self.J;
+            end
             
+        end
+        
+        function [eSt] = getRigidBodyJacobian(self)
+            eOt = self.gm.eTt(1:3,4);
+            bTt = self.gm.getToolTransformWrtBase();
+            bRt = bTt(1:3,1:3);
+            b_eOt = bRt * eOt;
+            
+            eOt_vectop=[0 -b_eOt(3) b_eOt(2);
+                        b_eOt(3) 0 -b_eOt(1);
+                        -b_eOt(2) b_eOt(1) 0];
+            
+            eSt=[eye(3), zeros(3);
+                eOt_vectop', eye(3)];
+
         end
     end
 end
