@@ -17,7 +17,7 @@ function [h,theta] = RotToAngleAxis(R)
     if (((size(R, 1)==3 && size(R, 2)== 3) && norm(R.'*R - eye(3))<1e-6) && abs(det(R) - 1) < 1e-6 )
         theta = acos((trace(R)-1)/2);
         if theta <1e-6
-            h = [0; 0; 0];  % Arbitrary axis when no rotation
+            h = [1; 0; 0];  % Arbitrary axis when no rotation
    
         elseif abs(theta - pi) < 1e-6
             % Initialize the rotation axis h

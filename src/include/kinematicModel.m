@@ -51,25 +51,25 @@ classdef kinematicModel < handle
                 else
                     error('jointType must be 0 (rotational) or 1 (prismatic)')
                 end
-                eSt = self.getRigidBodyJacobian;
-     
-                self.J = eSt * self.J;
             end
+            eSt = self.getRigidBodyJacobian;
+     
+            self.J = eSt * self.J;
             
         end
         
         function [eSt] = getRigidBodyJacobian(self)
-            eOt = self.gm.eTt(1:3,4);
+            e_r_te = self.gm.eTt(1:3,4);
             bTe = self.gm.getTransformWrtBase(self.gm.jointNumber);
             bRe = bTe(1:3,1:3);
-            b_eOt = bRe.' * eOt;
+            b_r_te = bRe * e_r_te;
             
-            eOt_vectop=[0 -b_eOt(3) b_eOt(2);
-                        b_eOt(3) 0 -b_eOt(1);
-                        -b_eOt(2) b_eOt(1) 0];
+            b_r_te_vectop=[0 -b_r_te(3) b_r_te(2);
+                        b_r_te(3) 0 -b_r_te(1);
+                        -b_r_te(2) b_r_te(1) 0];
             
             eSt=[eye(3), zeros(3);
-                eOt_vectop', eye(3)];
+                b_r_te_vectop', eye(3)];
 
         end
     end
